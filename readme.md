@@ -14,4 +14,4 @@
 # DESARROLLADO CON:
 ## [Eclipse](https://www.eclipse.org/downloads/)
 ##
-![Alt text](https://github.com/PatricioCoronado/serial-Java-Arduino/blob/master/imagen.jpg "imagen"))
+![Alt text](https://github.com/PatricioCoronado/serial-Java-Arduino/blob/main/imagen.jpg "imagen"))
