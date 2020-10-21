@@ -15,6 +15,7 @@
 package javacom;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -24,14 +25,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Scanner;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import com.fazecast.jSerialComm.SerialPort;
 import java. util. Arrays;
 import javax.swing.JComboBox;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JTextField;
+import java.awt.Toolkit;
 
 public class ComSerial extends JFrame {
 
@@ -44,7 +46,7 @@ public class ComSerial extends JFrame {
 	private static JTextField recibido;
 	private JTextField cadenaEnviar;
 	private static JButton botonEnviar;
-	private JButton botonPrueba;
+	
 	
 	/********************************************************************
 	 * Ejecuta la aplicación
@@ -69,6 +71,10 @@ public class ComSerial extends JFrame {
 	 *****************************************************************/
 	public ComSerial() 
 	{
+		setIconImage(Toolkit.getDefaultToolkit().getImage("Conector.png"));
+		setTitle("COM Serial");
+		//Image icon = new ImageIcon(getClass().getResource("/Conector.png")).getImage();
+	    //    setIconImage(icon);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//Para cerrar la aplicación
 		setBounds(100, 100, 420, 215);
 		contentPane = new JPanel();//Instancia el panel
@@ -128,7 +134,7 @@ public class ComSerial extends JFrame {
 		String comandoEnviar = cadenaEnviar.getText()+'\r';
 		byte[] bitesEnviar=comandoEnviar.getBytes();
 		int numeroDeBites=bitesEnviar.length;
-		if(puertoSerie!=null && puertoSerie.isOpen()) //Evita enviar a un puerto que no exista o cerrado 
+		if(puertoSerie!=null && puertoSerie.isOpen() && numeroDeBites>1) //Evita enviar a un puerto que no exista o cerrado 
 		{
 			puertoSerie.writeBytes(bitesEnviar,numeroDeBites);
 		}
@@ -142,10 +148,12 @@ public class ComSerial extends JFrame {
 		{
 			// Selecciona el puerto de la lista
 			puertoSerie = SerialPort.getCommPort(listaPuertos.getSelectedItem().toString());
-			puertoSerie.setComPortTimeouts(SerialPort.TIMEOUT_SCANNER, 0, 0);
-			if(puertoSerie.openPort())//Si consigue abrir el puerto... 
+			if(puertoSerie.openPort())//Si consigue abrir el puerto lo configura 
 			{
-				puertoSerie.setBaudRate(115200);//Modifica el baudrate
+				puertoSerie.setComPortTimeouts(SerialPort.TIMEOUT_SCANNER, 0, 100);//100ms timeout escritura
+				//puertoSerie.setFlowControl(puertoSerie.FLOW_CONTROL_DISABLED);
+				puertoSerie.setComPortParameters(115200, 8, 1, 0);
+				//Resto de configuraciones 
 				abrirPuerto.setText("cerrar puerto");//Cambia el mensaje del botón
 				listaPuertos.setEnabled(false);//Inhabilita el JComboBox de puertos
 				botonEnviar.setEnabled(true);//Se puede enviar
@@ -161,6 +169,7 @@ public class ComSerial extends JFrame {
 				@Override public void run() 
 				{
 					//Clase que lee una linea completa del puerto
+					System.out.println(Thread.currentThread().getName());
 					Scanner scanner = new Scanner(puertoSerie.getInputStream());
 					while(scanner.hasNextLine())//Si encuentra '\n' cerrando la cadena recibida... 
 					{
